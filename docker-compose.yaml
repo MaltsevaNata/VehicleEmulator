@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  data-generator:
+    container_name: data-generator
+    build:
+      context: datagenerator/
+    restart: unless-stopped
+    ports:
+      - 8000:8080
