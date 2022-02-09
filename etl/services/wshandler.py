@@ -25,6 +25,7 @@ class WSHandler:
                 self.logger.debug(f"Invalid message: {msg}")
 
     async def run(self):
+        self.logger.info(f"ETL process started: getting websocket messages and writing them in MongoDB...")
         async with ClientSession() as session:
             async with session.ws_connect(self.config.dg_url) as ws:
                 async for msg in ws:

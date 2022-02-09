@@ -8,3 +8,11 @@ services:
     restart: unless-stopped
     ports:
       - 8000:8080
+
+  etl:
+    container_name: etl
+    env_file:
+      - ./.env
+    build:
+      context: etl/
+    restart: unless-stopped
