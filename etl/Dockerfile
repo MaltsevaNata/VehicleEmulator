@@ -7,6 +7,6 @@ RUN mkdir /app
 WORKDIR /app/
 COPY / /app/
 
-RUN pipenv install --system --deploy
+RUN pipenv install --system --deploy --skip-lock
 
 ENTRYPOINT ["python", "/app/main.py"]
