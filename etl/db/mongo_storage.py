@@ -1,4 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo.results import InsertOneResult
 
 from db.storage import Storage
 
@@ -10,7 +11,7 @@ class AsyncMongoStorage(Storage):
         self.collection = collection
         self.client = client
 
-    async def create(self, document: dict) -> dict:
+    async def create(self, document: dict) -> InsertOneResult:
         return await self.client[self.db][self.collection].insert_one(document)
 
     async def get(self, spec: dict) -> dict:
