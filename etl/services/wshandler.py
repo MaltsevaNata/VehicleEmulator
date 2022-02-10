@@ -1,7 +1,9 @@
 import logging
 import json
+import asyncio
 
 from aiohttp import WSMessage, WSMsgType, ClientSession
+from pydantic import ValidationError
 
 from core.config import Config
 from core.message import Message
@@ -18,15 +20,18 @@ class WSHandler:
         if msg.type == WSMsgType.TEXT:
             try:
                 msg_json = json.loads(msg.data)
-                message = Message(**msg_json)
+                message = Message(**msg_json)  # validates the fields and sets country if it is empty
                 result = await self.storage.create(message.dict())
-                self.logger.debug(f"Added document: {result}")
-            except json.decoder.JSONDecodeError:
-                self.logger.debug(f"Invalid message: {msg}")
+                self.logger.debug(f"Added document: {result.inserted_id}")
+            except (json.decoder.JSONDecodeError, ValidationError):
+                self.logger.debug(f"Invalid message: {msg.data}")
+        elif msg.type == WSMsgType.ERROR:
+            self.logger.warning(f"Connection error: {msg.data}")
+        elif msg.type == WSMsgType.CLOSE:
+            self.logger.warning("Server closed connection")
 
     async def run(self):
         self.logger.info("ETL process started: getting websocket messages and writing them in MongoDB...")
         async with ClientSession() as session:
             async with session.ws_connect(self.config.dg_url) as ws:
-                async for msg in ws:
-                    await self.handle_message(msg)
+                await asyncio.gather(*[await self.handle_message(msg) async for msg in ws])
