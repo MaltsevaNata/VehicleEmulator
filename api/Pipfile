@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+aiohttp = "==3.8.1"
+motor = "==2.5.1"
+pydantic = "==1.9.0"
+pymongo = "==3.12.3"
+
+[dev-packages]
+flake8 = "==4.0.1"
+
+[requires]
+python_version = "3.9"
