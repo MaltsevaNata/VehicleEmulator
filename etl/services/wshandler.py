@@ -6,7 +6,7 @@ from aiohttp import WSMessage, WSMsgType, ClientSession
 from pydantic import ValidationError
 
 from core.config import Config
-from core.message import Message
+from models.message import Message
 from db.storage import Storage
 
 
