@@ -16,3 +16,13 @@ services:
     build:
       context: etl/
     restart: unless-stopped
+
+  api:
+    container_name: api
+    env_file:
+      - ./.env
+    build:
+      context: api/
+    restart: unless-stopped
+    ports:
+      - 5000:5000

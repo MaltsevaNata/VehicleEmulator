@@ -4,7 +4,6 @@ from pymongo import errors
 from pydantic import PositiveInt
 from aiohttp import web
 from aiohttp_pydantic.oas.typing import r200
-from aiohttp_pydantic.oas import docstring_parser
 
 from views.base import BaseView
 from models.component import Component

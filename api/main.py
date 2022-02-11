@@ -26,7 +26,7 @@ async def on_shutdown(app):
     await close_db()
 
 
-async def main():
+async def web_app():
     app = web.Application(logger=logger)
     app['config'] = config
     app.on_startup.append(on_startup)
@@ -34,6 +34,11 @@ async def main():
     app.router.add_view('/components', ComponentsView)
     oas.setup(app)
     oas.setup(app, url_prefix='/spec-api')  # route to generate Open Api Specification
+    return app
+
+
+async def main():
+    app = await web_app()
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, 'localhost', 5000)
