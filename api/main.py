@@ -3,12 +3,13 @@ import logging
 from logging import config as logging_config
 
 from aiohttp import web
+from aiohttp_pydantic import oas
 
 from core.config import Config
 from core.logger import LOGGING
 from db.db_connection import connect_db, close_db
 from db.mongo_storage import AsyncMongoStorage
-from views.components import routes
+from views.components import ComponentsView
 
 config = Config()
 logging_config.dictConfig(LOGGING)
@@ -30,7 +31,9 @@ async def main():
     app['config'] = config
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
-    app.add_routes(routes)
+    app.router.add_view('/components', ComponentsView)
+    oas.setup(app)
+    oas.setup(app, url_prefix='/spec-api')  # route to generate Open Api Specification
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, 'localhost', 5000)

@@ -1,31 +1,29 @@
-import asyncio
+from typing import Optional, List
 
 from pymongo import errors
+from pydantic import PositiveInt
 from aiohttp import web
-from aiohttp.web_request import Request
-from aiohttp.web_response import Response
+from aiohttp_pydantic.oas.typing import r200
+from aiohttp_pydantic.oas import docstring_parser
+
+from views.base import BaseView
+from models.component import Component
 
 
-routes = web.RouteTableDef()
-
-
-@routes.get('/components')
-async def get_components(request: Request) -> Response:
-    print(request.url)
-    try:
-        page_size = int(request.rel_url.query.get('page_size', 50))
-        page_num = int(request.rel_url.query.get('page_num', 1))
-    except ValueError:
-        raise web.HTTPBadRequest(reason='one of the parameters is not a valid integer')
-    storage = request.app['storage']
-    try:
-        data = await storage.get_list(page_size, page_num)
-    except errors.ConnectionFailure:
-        raise web.HTTPServiceUnavailable(reason='no connection to database')
-    return web.json_response([doc for doc in data])
-
-
-@routes.get('/waiter')
-async def waiter(request):
-    await asyncio.sleep(20)
-    return web.Response(text='waited for 20 sec!')
+class ComponentsView(BaseView):
+    async def get(self,
+                  page_size: Optional[PositiveInt] = 50,
+                  page_num: Optional[PositiveInt] = 1
+                  ) -> r200[List[Component]]:
+        """
+        Get all components paginated by page_size
+        Tags: components
+        status codes:
+            400: Invalid arguments in query string
+            200: Success
+        """
+        try:
+            data = await self.storage.get_list(page_size, page_num)
+        except errors.ConnectionFailure:
+            raise web.HTTPServiceUnavailable(reason='No connection to database')
+        return web.json_response([doc for doc in data])
