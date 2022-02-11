@@ -1,11 +1,15 @@
 const dbName = "vehicles";
 const conn = new Mongo();
 const db = conn.getDB(dbName);
+use vehicles;
 
 const collectionSettings = [
     {
         name: "components",
-        shardKey: "country"
+        shardKey: "component",
+        indexFields: [
+            "component"
+        ]
     },
 ];
 
@@ -17,12 +21,13 @@ collectionSettings.forEach((collection) => {
     const indexFields = collection.indexFields;
 
     db.createCollection(collectionName);
-    if (shardKey !== undefined) {
-        sh.shardCollection(`${dbName}.${collectionName}`, {[shardKey]: "hashed"});
-    }
     if (indexFields !== undefined) {
         indexFields.forEach((field) => {
             db[collectionName].createIndex({[field]: -1});
         })
     }
+    if (shardKey !== undefined) {
+        sh.shardCollection(`${dbName}.${collectionName}`, {[shardKey]: "hashed"});
+    }
+
 });
