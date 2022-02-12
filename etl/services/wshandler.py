@@ -30,8 +30,17 @@ class WSHandler:
         elif msg.type == WSMsgType.CLOSE:
             self.logger.warning("Server closed connection")
 
+    async def bound_handle(self, sem, msg):
+        async with sem:
+            await self.handle_message(msg)
+
     async def run(self):
         self.logger.info("ETL process started: getting websocket messages and writing them in MongoDB...")
+        sem = asyncio.Semaphore(30000)
         async with ClientSession() as session:
             async with session.ws_connect(self.config.dg_url) as ws:
-                await asyncio.gather(*[await self.handle_message(msg) async for msg in ws])
+                tasks = []
+                async for msg in ws:
+                    task = asyncio.create_task(self.bound_handle(sem, msg))
+                    tasks.append(task)
+                await asyncio.gather(*tasks)
