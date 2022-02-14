@@ -37,7 +37,7 @@ class WSHandler:
 
     async def run(self):
         self.logger.info("ETL process started: getting websocket messages and writing them in MongoDB...")
-        sem = asyncio.Semaphore(30000)
+        sem = asyncio.Semaphore(1000)  # approximate number of possible opened sockets
         async with ClientSession() as session:
             async with session.ws_connect(self.config.dg_url) as ws:
                 tasks = []
