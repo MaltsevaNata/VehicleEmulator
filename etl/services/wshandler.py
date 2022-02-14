@@ -20,11 +20,12 @@ class WSHandler:
         if msg.type == WSMsgType.TEXT:
             try:
                 msg_json = json.loads(msg.data)
-                message = Message(**msg_json)  # validates the fields and sets country if it is empty
-                result = await self.storage.create(message.dict())
-                self.logger.debug(f"Added document: {result.inserted_id}")
             except (json.decoder.JSONDecodeError, ValidationError):
                 self.logger.debug(f"Invalid message: {msg.data}")
+                return
+            message = Message(**msg_json)  # validates the fields and sets country if it is empty
+            result = await self.storage.create(message.dict())
+            self.logger.debug(f"Added document: {result.inserted_id}")
         elif msg.type == WSMsgType.ERROR:
             self.logger.warning(f"Connection error: {msg.data}")
         elif msg.type == WSMsgType.CLOSE:
